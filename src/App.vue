@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div id="direction-Key" v-if=false>
+    <div id="direction-Key" v-if=directionKeyIsShow>
       <div class="direction-Key-btnbox">
         <div class="direction-Key-btn"
           @touchstart="directionTop()"
@@ -9,7 +9,9 @@
         <div class="direction-Key-btn">下</div>
         <div class="direction-Key-btn">左</div>
         <div class="direction-Key-btn">右</div>
-        <div class="close-direction-Key">结束接管</div>
+        <div class="close-direction-Key"
+             @click="hideDirection()"
+        >结束接管</div>
       </div>
       <div class="direction-Key-bottom">
       </div>
@@ -78,7 +80,7 @@
                   <i class="iconfont pad-homepage_fill"></i>
                   <p>召回</p>
                 </li>
-                <li>
+                <li @click="showDirection()">
                   <i class="iconfont pad-yidong"></i>
                   <p>接管</p>
                 </li>
@@ -107,9 +109,8 @@
         <div class="card-task-manager-body-intro crosswise">
           <ul>
             <li v-if="Object.keys(taskManagerContent)[0]">
-              {{Object.keys(taskManagerContent)[0]}}
-              &nbsp;&nbsp;
-              {{showDotName}}
+             <p>{{Object.keys(taskManagerContent)[0]}}</p>
+              <p>{{showDotName}}</p>
             </li>
             <li v-if="!Object.keys(taskManagerContent)[0]">
               无任务
@@ -502,6 +503,7 @@
         currentDotCounter:0,//当前目标点指针
         currentState:0,//当前目标点任务状态
         boxIsOpen:false,//箱门是否开启
+        directionKeyIsShow:false//（接管）方向控制页面是否显示
       }
     },
     watch:{
@@ -512,10 +514,8 @@
         getRecommend(cid,bid,val).then((res)=>{
           if(res.status===0){
             this.retrievedResult=res.data;
-            console.log(this.retrievedResult)
           }
         });
-        console.log(this.cidSelected)
       },//模糊检索
       currentState:function () {
         /*if(this.currentState==6){
@@ -567,11 +567,10 @@
             this.currentDotCounter++;
           }
         }*/
-      },
+      },//根据机器人上传的订单状态决定是否下发新的任务点
     },
     created(){
       this.jsonTaskList=JSON.parse(localStorage.getItem('localTaskList'))
-      //console.log(this.jsonTaskList)
     },
     mounted(){
       this.funCanvas();
@@ -581,14 +580,20 @@
       this.$refs.canvas.height=this.canvasHeight;
     },
     methods: {
+      showDirection:function () {
+        this.directionKeyIsShow=true
+      },//显示接管页
+      hideDirection:function () {
+        this.directionKeyIsShow=false
+      },//隐藏接管页
       directionTop:function () {
         var topInterval=setInterval(function () {
             cmdVel.publish(twistTop)
           },100)
-      },
+      },//开始点击向上按钮
       directionTopEnd:function () {
         clearInterval(topInterval)
-      },
+      },//松开向上按钮
       openLock:function () {
         LockClient.callService(request1, function(result) {
           console.log('Result for service call on '
@@ -663,9 +668,10 @@
       },//任务列表退出编辑状态
       taskToggle:function () {
         if(this.currentTaskCounter<this.taskIngArr.length){
-          console.log("111");
+          this.taskManagerContent=this.taskIngArr[this.currentTaskCounter];
           var newPosition=Object.values(Object.values(this.taskIngArr[this.currentTaskCounter])[0][this.currentDotCounter])[0];
           var newName=Object.keys(Object.values(this.taskIngArr[this.currentTaskCounter])[0][this.currentDotCounter])[0];
+          this.showDotName = newName;
           var position={
             x : newPosition[0],
             y : newPosition[1],
@@ -673,7 +679,7 @@
           }
           var p0= new ROSLIB.Message({
             Floor : "dsj_11f",
-            Style : "G",
+            Style : "M",
             Pose : {
               position : position,
               orientation : {
@@ -695,7 +701,6 @@
           var srvs = new ROSLIB.ServiceRequest({
             task : c_task
           });
-          console.log('hahahhaha ')
           posesClient.callService(srvs, function(result) {
             console.log('Result for service call on '
               + posesClient.name
@@ -708,7 +713,6 @@
             this.currentTaskCounter++;
             console.log(this.currentTaskCounter);
             this.currentDotCounter=0;
-            this.taskManagerContent=this.taskIngArr[this.currentTaskCounter]
           }else{
             this.currentDotCounter++;
           }
@@ -717,10 +721,12 @@
 //          }
 //        this.currentState++;
 
-          this.showDotName = newName;
+
         }else{
-          alert("后面没有点了");
-          this.showDotName = "";
+          alert("再次点击会重复执行此轮任务");
+          this.currentTaskCounter=0;
+          this.currentDotCounter=0;
+          //this.taskManagerContent=this.taskIngArr[this.currentTaskCounter]
         }
         console.log('任务开始暂停切换')
       },//切换任务的开始和暂停
