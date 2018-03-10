@@ -462,6 +462,7 @@
     data(){
       return{
         taskManagerIsShow:true,//任务简介卡片是否显示
+        fadjk:true,
         taskManagerContent:{},//任务简介显示内容
         taskListIsShow:false,//任务列表卡片是否显示
         taskIsShow:false,//任务卡片是否显示
