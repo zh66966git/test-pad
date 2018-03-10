@@ -472,7 +472,7 @@
         jsonTaskList:[],//从localStorage中获取到的全部任务
         taskArr:[],//任务详情初始态
         cidSelected:'110100-110000221958',//建筑选择初始态
-        newTaskArr:[{'打印区':[116.307464,39.983776]},{'开机点':[116.307617786,39.9837888102]}],//新建任务列表初始态
+        newTaskArr:[{'打印区':[116.307464,39.983776]},{'开机点':[116.307594,39.983773]}],//新建任务列表初始态
         newTaskState:true,//新建任务是否为编辑状态
         retrievedResult:[],//检索结果
         sugBoxIsShow:false,//检索结果栏是否显示
@@ -797,7 +797,7 @@
       },//任务详情进入编辑状态
       newTaskCancel:function () {
         console.log('取消新建任务');
-        this.newTaskArr=[{'打印区':[116.307464,39.983776]},{'开机点':[116.307617786,39.9837888102]}];
+        this.newTaskArr=[{'打印区':[116.307464,39.983776]},{'开机点':[116.307594,39.983773]}];
         this.canvasEmpty();
       },//取消新建任务
       newTaskFinish:function () {
@@ -805,7 +805,7 @@
         let name2=Object.keys(this.newTaskArr[this.newTaskArr.length-1])[0];
         let name12=name1+"-"+name2+"("+this.newTaskArr.length+")";
         this.$set(this.jsonTaskList,name12,this.newTaskArr);
-        this.newTaskArr=[{'打印区':[116.307464,39.983776]},{'开机点':[116.307617786,39.9837888102]}];
+        this.newTaskArr=[{'打印区':[116.307464,39.983776]},{'开机点':[116.307594,39.983773]}];
         localStorage.setItem('localTaskList',JSON.stringify(this.jsonTaskList) );
         this.canvasEmpty()
       },//完成新建任务
